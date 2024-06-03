@@ -1,14 +1,15 @@
 import { useNavigation } from '@react-navigation/native';
 import { collection, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { Button, Card, Dialog, FAB, PaperProvider, Paragraph, Portal, Text } from 'react-native-paper';
 import { db } from '../service/connectionFirebase';
 
 export default function ProductsManager() {
-
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [visible, setVisible] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -29,50 +30,75 @@ export default function ProductsManager() {
         search();
     }, []);
 
-    async function handleDelete(key) {
-        try {
-            const docRef = doc(db, 'products', key);
-            await deleteDoc(docRef);
-            console.log('Document successfully deleted!');
-        } catch (error) {
-            console.error('Error removing document: ', error);
+    const showDialog = (product) => {
+        setSelectedProduct(product);
+        setVisible(true);
+    };
+
+    const hideDialog = () => {
+        setSelectedProduct(null);
+        setVisible(false);
+    };
+
+    async function handleDelete() {
+        if (selectedProduct) {
+            try {
+                const docRef = doc(db, 'products', selectedProduct.key);
+                await deleteDoc(docRef);
+                console.log('Document successfully deleted!');
+            } catch (error) {
+                console.error('Error removing document: ', error);
+            }
+            hideDialog();
         }
     }
 
     return (
         <View style={styles.container}>
-            <View>
-                <Text style={styles.listar}>Listagem de Produtos</Text>
-            </View>
-            <TouchableOpacity
-                style={{ bottom: 20, right: 20, backgroundColor: 'blue', padding: 10, borderRadius: 50 }}
-                onPress={() => navigation.navigate('ProductForm')}
-            >
-                <Text style={{ color: 'white' }}>Novo</Text>
-            </TouchableOpacity>
+            <Text style={styles.listar}>Listagem de Produtos</Text>
             {loading
-                ? (<ActivityIndicator color="#121212" size={45} />)
+                ? (<ActivityIndicator color="#6200ee" size={45} />)
                 : (<FlatList
                     data={products}
                     keyExtractor={(item) => item.key}
                     renderItem={({ item }) => (
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 }}>
-                            <Text>{item.name}</Text>
-                            <View style={{ flexDirection: 'row' }}>
-                                <TouchableOpacity onPress={() => navigation.navigate('ProductForm', { product: item })}>
-                                    <Text style={{ marginRight: 10 }}>Editar</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => handleDelete(item.key)}>
-                                    <Text style={{ color: 'red' }}>Excluir</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <Card style={styles.card}>
+                            <Card.Title style={styles.titleCard} title={item.name} />
+                            <Card.Content>
+                                <Text>Marca: {item.brand}</Text>
+                                <Text>Tipo: {item.type}</Text>
+                                <Text>Preço: {item.price}</Text>
+                            </Card.Content>
+                            <Card.Actions>
+                                <Button textColor='#969696' style={styles.buttonEdit} onPress={() => navigation.navigate('ProductForm', { product: item })}>Editar</Button>
+                                <Button textColor='white' style={styles.buttonDelete} onPress={() => showDialog(item)}>Excluir</Button>
+                            </Card.Actions>
+                        </Card>
                     )}
-                />
-
-                )
+                />)
             }
-
+            <FAB
+                style={styles.fab}
+                icon="plus"
+                color="white"
+                onPress={() => navigation.navigate('ProductForm')}
+            />
+            <View style={styles.portal}>
+                <PaperProvider>
+                    <Portal>
+                        <Dialog visible={visible} onDismiss={hideDialog}>
+                            <Dialog.Title>Confirmar Exclusão</Dialog.Title>
+                            <Dialog.Content>
+                                <Paragraph>Tem certeza que deseja excluir o produto {selectedProduct?.name}?</Paragraph>
+                            </Dialog.Content>
+                            <Dialog.Actions>
+                                <Button onPress={hideDialog}>Cancelar</Button>
+                                <Button onPress={handleDelete}>Excluir</Button>
+                            </Dialog.Actions>
+                        </Dialog>
+                    </Portal>
+                </PaperProvider >
+            </View >
         </View >
     );
 }
@@ -80,50 +106,50 @@ export default function ProductsManager() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        margin: 10,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#121212',
-        height: 40,
-        fontSize: 13,
-        borderRadius: 8
-    },
-    separator: {
-        marginVertical: 5,
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#3ea6f2',
-        borderWidth: 0.5,
-        borderColor: '#fff',
-        height: 40,
-        borderRadius: 5,
-    },
-    buttonImageIconStyle: {
-        padding: 10,
-        margin: 5,
-        height: 25,
-        width: 25,
-        resizeMode: 'stretch',
-    },
-    buttonTextStyle: {
-        color: '#fff',
-        fontSize: 20
-    },
-    buttonIconSeparatorStyle: {
-        backgroundColor: '#fff',
-        width: 1,
-        height: 20,
+        backgroundColor: '#f4f4f4',
+        paddingHorizontal: 16,
+        paddingVertical: 24,
     },
     listar: {
-        fontSize: 20,
+        fontSize: 24,
+        fontWeight: 'bold',
         textAlign: 'center',
-        marginTop: 20
+        marginVertical: 20,
+        color: '#6200ee',
     },
-    title: {
-        textAlign: 'center',
+    card: {
+        marginVertical: 10,
+        borderRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 4,
+        backgroundColor: '#fafafa'
     },
-}); 
+    buttonEdit: {
+        borderRadius: 5,
+        color: '#fff'
+    },
+    buttonDelete: {
+        borderRadius: 5,
+        backgroundColor: '#6200ee',
+        color: '#fff',
+    },
+    titleCard: {
+        color: '#000',
+        textTransform: 'uppercase',
+    },
+    fab: {
+        position: 'absolute',
+        right: 16,
+        bottom: 16,
+        backgroundColor: '#6200ee',
+    },
+    portal: {
+        position: 'absolute',
+        bottom: '50%',
+        width: '100vw',
+        right: 0
+    },
+});

@@ -1,9 +1,8 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import 'firebase/firestore';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Button, Keyboard, StyleSheet, View } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { Keyboard, StyleSheet, View } from 'react-native';
+import { Button, Text, TextInput } from 'react-native-paper';
 import { db } from '../service/connectionFirebase';
 
 const ProductForm = () => {
@@ -68,10 +67,11 @@ const ProductForm = () => {
     }
 
     return (
-        <View style={{ flex: 1, padding: 20 }}>
+        <View style={styles.container}>
             <TextInput
-                placeholder="Nome"
-                left={< TextInput.Icon icon="briefcase" />}
+                label="Nome"
+                mode="outlined"
+                left={<TextInput.Icon icon="briefcase" />}
                 maxLength={40}
                 style={styles.input}
                 onChangeText={setName}
@@ -79,85 +79,62 @@ const ProductForm = () => {
             />
             <Separator />
             <TextInput
-                placeholder="Marca"
+                label="Marca"
+                mode="outlined"
                 left={<TextInput.Icon icon="sale" />}
                 style={styles.input}
-                onChangeText={(texto) => setBrand(texto)}
+                onChangeText={setBrand}
                 value={brand}
             />
             <Separator />
             <TextInput
-                placeholder="Tipo"
+                label="Tipo"
+                mode="outlined"
                 left={<TextInput.Icon icon="sack" />}
                 style={styles.input}
-                onChangeText={(texto) => setType(texto)}
+                onChangeText={setType}
                 value={type}
             />
             <Separator />
             <TextInput
-                placeholder="Valor"
+                label="Valor"
+                mode="outlined"
                 left={<TextInput.Icon icon="cash" />}
                 style={styles.input}
                 onChangeText={setPrice}
                 value={price}
             />
             <Separator />
-            <Button title="Salvar" onPress={insertUpdate} />
-        </View >
+            <Button mode="contained" onPress={insertUpdate} style={styles.button}>
+                <Text style={styles.textButton}>Salvar</Text>
+            </Button>
+        </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        margin: 10,
+        padding: 20,
+        backgroundColor: '#f5f5f5',
     },
     input: {
-        borderWidth: 1,
-        borderColor: '#121212',
-        height: 40,
-        fontSize: 13,
-        borderRadius: 8
+        marginBottom: 5,
+        backgroundColor: '#d6d6d6'
     },
     separator: {
-        marginVertical: 5,
+        height: 5,
     },
     button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#3ea6f2',
-        borderWidth: 0.5,
-        borderColor: '#fff',
-        height: 40,
+        marginTop: 20,
+        padding: 10,
         borderRadius: 5,
     },
-    buttonImageIconStyle: {
-        padding: 10,
-        margin: 5,
-        height: 25,
-        width: 25,
-        resizeMode: 'stretch',
-    },
-    buttonTextStyle: {
-        color: '#fff',
-        fontSize: 20
-    },
-    buttonIconSeparatorStyle: {
-        backgroundColor: '#fff',
-        width: 1,
-        height: 20,
-    },
-    listar: {
+    textButton: {
         fontSize: 20,
-        textAlign: 'center',
-        marginTop: 20
-    },
-    title: {
-        textAlign: 'center',
-    },
+        fontWeight: 'bold',
+        color: '#ffffff'
+    }
 });
 
 export default ProductForm;
-
