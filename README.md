@@ -14,4 +14,4 @@ Este projeto é uma aplicação mobile desenvolvida em React Native que implemen
 - **Adicionar Produtos**: Permite adicionar novos produtos ao banco de dados
 - **Listar Produtos**: Exibe uma lista de todos os produtos cadastrados
 - **Atualizar Produtos**: Permite atualizar as informações de produtos existentes
-- - **Excluir Produtos**: Permite excluir produtos do banco de dados
+- **Excluir Produtos**: Permite excluir produtos do banco de dados
